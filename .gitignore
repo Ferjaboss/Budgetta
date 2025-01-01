@@ -44,12 +44,12 @@ app.*.map.json
 
 
 # Flutter create . & flutter run will generate these files 
-/android
-/ios
-/web
-/windows
-/linux
-/macos
-/build
+/android/
+/ios/
+/web/
+/windows/
+/linux/
+/macos/
+/assets/fonts/
 
 

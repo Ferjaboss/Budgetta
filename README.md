@@ -29,6 +29,8 @@ NOTE: This project is still under development. More features will be added in fu
     ```bash
     flutter pub get
     ```
+## NB : You need to download the official Apple SF fonts from the official Apple website and import them in the /assets/fonts folder before running the app.
+
 5. **Run the app**:
     ```bash
     flutter run
