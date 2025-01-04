@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:budget_tracker/services/utils.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import '../models/profile.dart';
+import '../widgets/add_profile.dart';
 import '../widgets/bottom_nav_menu.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -8,16 +11,36 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final List<Map<String, dynamic>> _profiles = [
-    {'name': 'John Doe', 'balance': 1500.00},
-    {'name': 'Jane Smith', 'balance': 2300.00},
-    {'name': 'Alice Johnson', 'balance': 3200.00},
-  ];
+  late Box<Profile> _profileBox;
+
+  @override
+  void initState() {
+    super.initState();
+    _openBox();
+  }
+
+  Future<void> _openBox() async {
+    _profileBox = await Hive.openBox<Profile>('profiles');
+    setState(() {});
+  }
 
   void _deleteProfile(int index) {
     setState(() {
-      _profiles.removeAt(index);
+      _profileBox.deleteAt(index);
     });
+  }
+
+  void _showAddProfileDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AddProfile(
+          onAdd: (String name) {
+            setState(() {});
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -35,46 +58,49 @@ class _ProfilePageState extends State<ProfilePage> {
           IconButton(
             padding: EdgeInsets.only(right: 20),
             icon: Icon(Icons.add, color: Colors.black),
-            onPressed: () {
-              showAddUserDialog(context, (String name) {
-                setState(() {
-                  _profiles.add({'name': name, 'balance': 0.00});
-                });
-              });
-              print('Add profile tapped!');
-            },
+            onPressed: _showAddProfileDialog,
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: _profiles.length,
-        itemBuilder: (context, index) {
-          return Dismissible(
-            key: Key(_profiles[index]['name']),
-            direction: DismissDirection.endToStart,
-            onDismissed: (direction) {
-              _deleteProfile(index);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${_profiles[index]['name']} deleted')),
+      body: ValueListenableBuilder(
+        valueListenable: _profileBox.listenable(),
+        builder: (context, Box<Profile> box, _) {
+          if (box.values.isEmpty) {
+            return Center(child: Text('No profiles added.'));
+          }
+
+          return ListView.builder(
+            itemCount: box.length,
+            itemBuilder: (context, index) {
+              final profile = box.getAt(index);
+              return Dismissible(
+                key: Key(profile!.name),
+                direction: DismissDirection.endToStart,
+                onDismissed: (direction) {
+                  _deleteProfile(index);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('${profile.name} deleted')),
+                  );
+                },
+                background: Container(
+                  color: Colors.red,
+                  alignment: Alignment.centerRight,
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Icon(Icons.delete, color: Colors.white),
+                ),
+                child: ListTile(
+                  title: Text(profile.name),
+                  subtitle: Text('Total balance: \$${profile.balance}'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.settings),
+                    onPressed: () {
+                      // Handle settings button tap
+                      print("Settings tapped for ${profile.name}!");
+                    },
+                  ),
+                ),
               );
             },
-            background: Container(
-              color: Colors.red,
-              alignment: Alignment.centerRight,
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Icon(Icons.delete, color: Colors.white),
-            ),
-            child: ListTile(
-              title: Text(_profiles[index]['name']),
-              subtitle: Text('Total balance: \$${_profiles[index]['balance']}'),
-              trailing: IconButton(
-                icon: Icon(Icons.settings),
-                onPressed: () {
-                  // Handle settings button tap
-                  print("Settings tapped for ${_profiles[index]['name']}!");
-                },
-              ),
-            ),
           );
         },
       ),

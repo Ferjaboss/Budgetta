@@ -6,8 +6,14 @@ import 'package:budget_tracker/pages/first_time_settings.dart';
 import 'package:budget_tracker/pages/dashboard.dart';
 import 'package:budget_tracker/pages/wallet_page.dart';
 import 'package:budget_tracker/pages/statistics_page.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'models/profile.dart';
 
-void main() => runApp(MaterialApp(
+void main() async {
+  await Hive.initFlutter();
+  Hive.registerAdapter(ProfileAdapter());
+  await Hive.openBox<Profile>('profiles');
+  runApp(MaterialApp(
         theme: ThemeData(
           useMaterial3: true,
           primaryColor: AppColors.customPink,
@@ -23,3 +29,4 @@ void main() => runApp(MaterialApp(
           '/profile': (context) => ProfilePage(),
           '/statistics': (context) => StatisticsPage(),
         }));
+}

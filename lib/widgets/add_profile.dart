@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import '../models/profile.dart';
 
-class AddUser extends StatefulWidget {
+class AddProfile extends StatefulWidget {
   final Function(String) onAdd;
 
-  const AddUser({Key? key, required this.onAdd}) : super(key: key);
+  const AddProfile({Key? key, required this.onAdd}) : super(key: key);
 
   @override
-  _AddUserState createState() => _AddUserState();
+  _AddProfileState createState() => _AddProfileState();
 }
 
-class _AddUserState extends State<AddUser> {
+class _AddProfileState extends State<AddProfile> {
   final TextEditingController _controller = TextEditingController();
 
   @override
@@ -30,19 +32,19 @@ class _AddUserState extends State<AddUser> {
           child: Text('Cancel'),
         ),
         TextButton(
-          onPressed: () {
-            widget.onAdd(_controller.text);
-            Navigator.of(context).pop();
+          onPressed: () async {
+            final name = _controller.text;
+            if (name.isNotEmpty) {
+              final profile = Profile(name: name, balance: 0.0);
+              final box = await Hive.openBox<Profile>('profiles');
+              await box.add(profile);
+              widget.onAdd(name);
+              Navigator.of(context).pop();
+            }
           },
           child: Text('Add'),
         ),
       ],
     );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 }

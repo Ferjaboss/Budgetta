@@ -1,6 +1,6 @@
 import 'package:budget_tracker/widgets/add_wallet.dart';
 import 'package:flutter/material.dart';
-import 'package:budget_tracker/widgets/add_user.dart';
+import 'package:budget_tracker/widgets/add_profile.dart';
 
 
 void showAddWalletDialog(BuildContext context, Function(String) onAdd) {
@@ -13,6 +13,6 @@ void showAddWalletDialog(BuildContext context, Function(String) onAdd) {
 void showAddUserDialog(BuildContext context, Function(String) onAdd) {
   showDialog(
     context: context,
-    builder: (context) => AddUser(onAdd: onAdd),
+    builder: (context) => AddProfile(onAdd: onAdd),
   );
 }
